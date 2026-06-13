@@ -6,7 +6,9 @@ SECRET_KEY = 'django-insecure-change-me'
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver']
+ALLOWED_HOSTS = ['yourusername.pythonanywhere.com']
+DEBUG = False
+STATIC_ROOT = '/home/yourusername/booking2/booking_project/booking/staticfiles'
 
 INSTALLED_APPS = [
     'django.contrib.admin',
