@@ -1,0 +1,52 @@
+{% extends 'bookings/base.html' %}
+{% block title %}Кімнати{% endblock %}
+
+{% block content %}
+<div class="page-title">
+  <h1>Кімнати та місця</h1>
+</div>
+
+<form class="filters" method="get">
+  <div class="field">
+    <label for="type">Тип</label>
+    <select name="type" id="type" onchange="this.form.submit()">
+      <option value="">Усі</option>
+      {% for t in room_types %}
+        <option value="{{ t.slug }}" {% if t.slug == active_type %}selected{% endif %}>{{ t.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="capacity">Вмістимість від</label>
+    <input type="number" min="1" name="capacity" id="capacity" value="{{ active_capacity }}" style="width:80px;">
+  </div>
+  <!-- <button class="btn" type="submit">Фільтр</button> -->
+  {% if active_type or active_capacity %}
+    <a class="btn secondary" href="{% url 'bookings:room_list' %}">Скинути</a>
+  {% endif %}
+</form>
+
+{% if rooms %}
+<div class="grid">
+  {% for room in rooms %}
+  <div class="card">
+    {% if room.room_type %}<span class="type-tag">{{ room.room_type.name }}</span>{% endif %}
+    <h3>{{ room.name }}</h3>
+    {% if room.description %}<p class="meta">{{ room.description|truncatewords:15 }}</p>{% endif %}
+    <p class="meta">Вмістимість: {{ room.capacity }} осіб</p>
+    {% if room.features.all %}
+    <div class="features">
+      {% for f in room.features.all %}<span class="feature-chip">{{ f.name }}</span>{% endfor %}
+    </div>
+    {% endif %}
+    <div class="foot">
+      <span class="price">{{ room.price_per_hour }} грн/год</span>
+      <a class="btn" href="{% url 'bookings:room_detail' room.pk %}">Деталі</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p>За цими фільтрами нічого не знайдено. <a href="{% url 'bookings:room_list' %}">Показати всі</a></p>
+{% endif %}
+{% endblock %}

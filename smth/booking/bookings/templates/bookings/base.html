@@ -1,0 +1,37 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Бронювання{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'bookings/styles.css' %}">
+</head>
+<body>
+
+<header class="site-header">
+  <a class="brand" href="{% url 'bookings:room_list' %}">Бронювання</a>
+  <nav class="site-nav">
+    <a href="{% url 'bookings:room_list' %}">Кімнати</a>
+    <a href="{% url 'bookings:calendar' %}">Календар</a>
+    <a href="{% url 'bookings:my_bookings' %}">Мої бронювання</a>
+    <a href="/admin/">Адмін</a>
+  </nav>
+</header>
+
+<main>
+  {% if messages %}
+    <ul class="messages">
+      {% for m in messages %}<li>{{ m }}</li>{% endfor %}
+    </ul>
+  {% endif %}
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+  Система бронювання приміщень
+</footer>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

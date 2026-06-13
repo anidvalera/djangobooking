@@ -1,0 +1,21 @@
+{% extends 'bookings/base.html' %}
+{% block title %}Бронювання створено{% endblock %}
+
+{% block content %}
+<div class="page-title">
+  <h1>Бронювання №{{ booking.pk }} створено</h1>
+</div>
+<p>Підтвердження надіслано на {{ booking.email }}.</p>
+<table style="margin-top:14px; border-collapse:collapse;">
+  <tr><td style="padding:4px 16px 4px 0; color:#555;">Кімната</td><td><strong>{{ booking.room.name }}</strong></td></tr>
+  <tr><td style="padding:4px 16px 4px 0; color:#555;">Початок</td><td>{{ booking.start_time|date:"d.m.Y H:i" }}</td></tr>
+  <tr><td style="padding:4px 16px 4px 0; color:#555;">Завершення</td><td>{{ booking.end_time|date:"d.m.Y H:i" }}</td></tr>
+  <tr><td style="padding:4px 16px 4px 0; color:#555;">Тривалість</td><td>{{ booking.duration_hours }} год</td></tr>
+  <tr><td style="padding:4px 16px 4px 0; color:#555;">Вартість</td><td>{{ booking.total_price }} грн</td></tr>
+  <tr><td style="padding:4px 16px 4px 0; color:#555;">Статус</td><td><span class="pill {{ booking.status }}">{{ booking.get_status_display }}</span></td></tr>
+</table>
+<div style="margin-top:16px; display:flex; gap:8px;">
+  <a class="btn" href="{% url 'bookings:room_list' %}">До кімнат</a>
+  <a class="btn secondary" href="{% url 'bookings:my_bookings' %}?email={{ booking.email }}">Мої бронювання</a>
+</div>
+{% endblock %}

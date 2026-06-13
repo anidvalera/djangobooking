@@ -1,0 +1,41 @@
+{% extends 'bookings/base.html' %}
+{% block title %}Мої бронювання{% endblock %}
+
+{% block content %}
+<div class="page-title"><h1>Мої бронювання</h1></div>
+
+<form class="filters" method="get">
+  <div class="field">
+    <label for="email">Електронна пошта</label>
+    <input type="email" name="email" id="email" value="{{ email }}" placeholder="you@example.com" required style="width:260px;">
+  </div>
+  <button class="btn" type="submit">Знайти</button>
+</form>
+
+{% if email %}
+  {% if bookings %}
+  <ul class="list-clean">
+    {% for b in bookings %}
+    <li class="booking-row">
+      <div>
+        <strong>{{ b.room.name }}</strong><br>
+        <span class="muted">{{ b.start_time|date:"d.m.Y H:i" }} – {{ b.end_time|date:"H:i" }}</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span class="pill {{ b.status }}">{{ b.get_status_display }}</span>
+        {% if b.status != 'cancelled' and not b.is_past %}
+        <form method="post" action="{% url 'bookings:cancel_booking' b.pk %}" onsubmit="return confirm('Скасувати?');">
+          {% csrf_token %}
+          <input type="hidden" name="email" value="{{ email }}">
+          <button class="btn secondary" type="submit">Скасувати</button>
+        </form>
+        {% endif %}
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p>За адресою {{ email }} бронювань не знайдено.</p>
+  {% endif %}
+{% endif %}
+{% endblock %}

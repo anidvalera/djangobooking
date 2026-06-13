@@ -1,0 +1,99 @@
+{% extends 'bookings/base.html' %}
+{% block title %}{{ room.name }}{% endblock %}
+
+{% block content %}
+<p><a href="{% url 'bookings:room_list' %}">← Назад</a></p>
+
+<div class="two-col" style="margin-top:14px;">
+  <div class="panel">
+    {% if room.room_type %}<span class="type-tag">{{ room.room_type.name }}</span><br><br>{% endif %}
+    <h1>{{ room.name }}</h1>
+    <p class="meta">Вмістимість: {{ room.capacity }} осіб &nbsp;|&nbsp; {{ room.price_per_hour }} грн/год</p>
+    {% if room.description %}<p style="margin-top:8px;">{{ room.description }}</p>{% endif %}
+
+    {% if room.features.all %}
+    <p style="margin-top:10px;"><strong>Особливості:</strong></p>
+    <div class="features" style="margin-top:4px;">
+      {% for f in room.features.all %}<span class="feature-chip">{{ f.name }}</span>{% endfor %}
+    </div>
+    {% endif %}
+
+    <p style="margin-top:14px;"><strong>Найближчі бронювання:</strong></p>
+    {% if upcoming %}
+    <ul class="list-clean" style="margin-top:6px;">
+      {% for b in upcoming %}
+      <li class="booking-row">
+        <span>{{ b.start_time|date:"d.m H:i" }} – {{ b.end_time|date:"H:i" }}</span>
+        <span class="pill {{ b.status }}">{{ b.get_status_display }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    <p style="margin-top:8px; font-size:.85rem;"><a href="{% url 'bookings:calendar' %}?room={{ room.pk }}">Переглянути в календарі →</a></p>
+    {% else %}
+    <p class="muted" style="margin-top:6px;">Немає бронювань.</p>
+    {% endif %}
+  </div>
+
+  <div class="panel">
+    <h2>Забронювати</h2>
+    {% if form.non_field_errors %}
+      <ul class="errorlist">{% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}</ul>
+    {% endif %}
+    <form method="post" action="{% url 'bookings:create_booking' %}" style="margin-top:10px;">
+      {% csrf_token %}
+      <div class="form-grid">
+        <div class="form-row full">
+          <label for="{{ form.user_name.id_for_label }}">{{ form.user_name.label }}</label>
+          {{ form.user_name }}
+          {{ form.user_name.errors }}
+        </div>
+        <div class="form-row full">
+          <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+          {{ form.email }}
+          {{ form.email.errors }}
+        </div>
+        <div class="form-row full">
+          <label for="{{ form.room.id_for_label }}">{{ form.room.label }}</label>
+          {{ form.room }}
+          {{ form.room.errors }}
+        </div>
+        <div class="form-row">
+          <label for="{{ form.start_time.id_for_label }}">{{ form.start_time.label }}</label>
+          {{ form.start_time }}
+          {{ form.start_time.errors }}
+        </div>
+        <div class="form-row">
+          <label for="{{ form.end_time.id_for_label }}">{{ form.end_time.label }}</label>
+          {{ form.end_time }}
+          {{ form.end_time.errors }}
+        </div>
+      </div>
+      <div class="avail-hint" id="avail-hint" aria-live="polite"></div>
+      <button class="btn" type="submit" style="margin-top:12px; width:100%;">Забронювати</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  var checkUrl = "{% url 'bookings:check_availability' %}";
+  var roomEl = document.getElementById("{{ form.room.id_for_label }}");
+  var startEl = document.getElementById("{{ form.start_time.id_for_label }}");
+  var endEl = document.getElementById("{{ form.end_time.id_for_label }}");
+  var hint = document.getElementById("avail-hint");
+  var timer;
+  function check() {
+    if (!roomEl.value || !startEl.value || !endEl.value) { hint.textContent = ""; return; }
+    hint.textContent = "Перевіряємо...";
+    var p = new URLSearchParams({ room: roomEl.value, start: startEl.value, end: endEl.value });
+    fetch(checkUrl + "?" + p).then(function(r){ return r.json(); }).then(function(d){
+      hint.textContent = d.ok ? d.message : (d.error || "Помилка");
+    }).catch(function(){ hint.textContent = "Помилка перевірки"; });
+  }
+  function schedule() { clearTimeout(timer); timer = setTimeout(check, 350); }
+  [roomEl, startEl, endEl].forEach(function(el){ if(el) el.addEventListener("change", schedule); });
+})();
+</script>
+{% endblock %}
